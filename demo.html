@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html ng-app="demoApp">
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>netcareNavMenu</title>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link href="css/bootstrap-theme.css" rel="stylesheet"/>
+    <link href="css/font-awesome.css" rel="stylesheet"/>
+    <link href="css/uinavmenu.css" rel="stylesheet"/>
+    <script src="lib/angular.min.js"></script>
+    <script src="js/uiNavMenu.js"></script>
+    <script>
+        angular.module("demoApp", ['uiNavMenu'])
+                .controller("demoCtrl", function ($scope,$http) {
+                    $scope.loadData = function () {
+                        $http.get("menu.json").success(function (data) {
+                            $scope.menus = data;
+                        });
+                    }
+
+                    $scope.loadData();
+                });
+    </script>
+</head>
+
+<body ng-controller="demoCtrl">
+<div id="top-nav" class="fixed">
+    <div class="row">
+        <div class="col-md-12">
+            <li class="main-menu-trigger">
+                <a class="menu-leaf" href="#">
+                    <i class="fa fa-bars fa-lg"></i>
+                </a>
+            </li>
+        </div>
+    </div>
+</div>
+<aside>
+    <nav class="main-menu-wrapper open-all">
+        <ui-nav-menu class="main-menu-nav" source="menus"></ui-nav-menu>
+    </nav>
+</aside>
+<div class="main-panel">
+    <div class="main-panel-content">
+        selected: {{ selected.name }}</div>
+    </div>
+</div>
+</body>
+
+</html>
