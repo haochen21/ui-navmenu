@@ -12,12 +12,16 @@
     <script src="js/uiNavMenu.js"></script>
     <script>
         angular.module("demoApp", ['uiNavMenu'])
-                .controller("demoCtrl", function ($scope,$http) {
+                .controller("demoCtrl", function ($scope,$http,uiNavMenuEvent) {
                     $scope.loadData = function () {
                         $http.get("menu.json").success(function (data) {
                             $scope.menus = data;
                         });
                     }
+
+                    $scope.$on(uiNavMenuEvent.clickMenuItem, function (event,menu) {
+                        $scope.selectMenu = menu;
+                    });
 
                     $scope.loadData();
                 });
@@ -43,7 +47,7 @@
 </aside>
 <div class="main-panel">
     <div class="main-panel-content">
-        selected: {{ selected.name }}</div>
+        selected: {{ menu.name }}</div>
     </div>
 </div>
 </body>
