@@ -26,17 +26,19 @@ angular.module('uiNavMenu', [])
                           +'<b ng-show="menu.children" class="arrow fa fa-angle-down"></b>'
                         +'</a>'
                       +'</li>',
-            link: function (scope, element, attrs) {
+            link: function (scope, $element, attrs) {
                 if (angular.isArray(scope.menu.children)) {
                     $compile('<ui-nav-menu class="main-submenu" source="menu.children" ng-style="{\'display\': displaySubMenu}"></ui-nav-menu>')(scope, function(cloned, scope){
-                        element.append(cloned);
+                        $element.append(cloned);
                     });
                 }
+
                 scope.displaySubMenu = 'none';
 
                 scope.openSubMenu = function($event,menu){
                     $event.stopPropagation();
                     if(menu.children){
+                        scope.closeAllSubMenu();
                         if(scope.displaySubMenu === 'none'){
                             scope.displaySubMenu = 'block';
                         }else{
@@ -44,6 +46,20 @@ angular.module('uiNavMenu', [])
                         }
                     }else{
                         scope.$emit(uiNavMenuEvent.clickMenuItem,menu);
+                    }
+                }
+
+                scope.closeAllSubMenu = function(){
+                    //find parent
+                    var parent = $element.parent();
+                    //find ul
+                    var ulItems = parent.find('ul');
+                    for(var i=0;i<ulItems.length;i++){
+                        var $ulItem = ulItems.eq(i);
+                        var $liParent = $ulItem.parent();
+                        if(!angular.equals($liParent,$element)){
+                            $ulItem.scope().displaySubMenu = 'none';
+                       }
                     }
                 }
             }

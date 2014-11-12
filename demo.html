@@ -11,43 +11,82 @@
     <script src="lib/angular.min.js"></script>
     <script src="js/uiNavMenu.js"></script>
     <script>
-        angular.module("demoApp", ['uiNavMenu'])
-                .controller("demoCtrl", function ($scope,$http,uiNavMenuEvent) {
+        angular.module('demoApp', ['uiNavMenu'])
+                .controller('demoCtrl', function ($scope,$http,uiNavMenuEvent) {
                     $scope.loadData = function () {
-                        $http.get("menu.json").success(function (data) {
+                        $http.get('menu.json').success(function (data) {
                             $scope.menus = data;
                         });
                     }
 
                     $scope.$on(uiNavMenuEvent.clickMenuItem, function (event,menu) {
                         $scope.selectMenu = menu;
+                        $scope.$broadcast('menuTrigger');
                     });
 
+                    $scope.openMenu = function($event){
+                        $scope.$broadcast('menuTrigger');
+                        $event.stopPropagation();
+                    }
+
                     $scope.loadData();
+                })
+                .controller('navMenuCrtl',function($scope){
+                    $scope.isOpen = false;
+                    $scope.$on('menuTrigger',function(){
+                        $scope.isOpen = !$scope.isOpen;
+                    })
                 });
     </script>
 </head>
 
 <body ng-controller="demoCtrl">
-<div id="top-nav" class="fixed">
-    <div class="row">
-        <div class="col-md-12">
-            <li class="main-menu-trigger">
+<nav id="top-navbar" class="fixed">
+    <div class="top-navbar-header">
+        <a href="#/" class="top-navbar-brand">
+            <small>NetCare</small>
+        </a>
+    </div>
+    <div class="top-navbar-wrapper">
+        <ul class="top-nav top-navbar-nav">
+            <li class="main-menu-trigger" ng-click="openMenu($event)">
                 <a class="menu-leaf" href="#">
                     <i class="fa fa-bars fa-lg"></i>
                 </a>
             </li>
-        </div>
+            <li>
+                <a href="#">
+                    <i class="fa fa-list fa-lg"></i>
+                </a>
+            </li>
+        </ul>
+        <ul class="top-nav top-navbar-nav pull-right">
+            <li>
+                <a href="#">
+                    <i class="fa fa-bell fa-lg"></i>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fa fa-joomla fa-lg"></i>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="glyphicon glyphicon-user"></span>
+                </a>
+            </li>
+        </ul>
     </div>
-</div>
-<aside>
-    <nav class="main-menu-wrapper open-all">
+</nav>
+<aside ng-controller="navMenuCrtl">
+    <nav class="main-menu-wrapper" ng-class="{'open':isOpen}">
         <ui-nav-menu class="main-menu-nav" source="menus"></ui-nav-menu>
     </nav>
 </aside>
 <div class="main-panel">
     <div class="main-panel-content">
-        selected: {{ menu.name }}</div>
+        selected: {{ selectMenu.name }}</div>
     </div>
 </div>
 </body>
