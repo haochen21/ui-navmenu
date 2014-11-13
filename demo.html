@@ -12,30 +12,46 @@
     <script src="js/uiNavMenu.js"></script>
     <script>
         angular.module('demoApp', ['uiNavMenu'])
-                .controller('demoCtrl', function ($scope,$http,uiNavMenuEvent) {
+                .controller('demoCtrl', function ($scope, $http, uiNavMenuEvent) {
+
+                    //navbar查询按钮显示配置
+                    $scope.openShellSearch = false;
+
                     $scope.loadData = function () {
                         $http.get('menu.json').success(function (data) {
                             $scope.menus = data;
                         });
                     }
 
-                    $scope.$on(uiNavMenuEvent.clickMenuItem, function (event,menu) {
+                    $scope.$on(uiNavMenuEvent.clickMenuItem, function (event, menu) {
                         $scope.selectMenu = menu;
                         $scope.$broadcast('menuTrigger');
                     });
 
-                    $scope.openMenu = function($event){
+                    $scope.openMenu = function ($event) {
                         $scope.$broadcast('menuTrigger');
                         $event.stopPropagation();
                     }
 
+                    $scope.clickShellSearch = function(value){
+                        $scope.openShellSearch = value;
+                    }
+
                     $scope.loadData();
                 })
-                .controller('navMenuCrtl',function($scope){
+                .controller('navMenuCrtl', function ($scope) {
                     $scope.isOpen = false;
-                    $scope.$on('menuTrigger',function(){
+                    $scope.$on('menuTrigger', function () {
                         $scope.isOpen = !$scope.isOpen;
                     })
+                })
+                .controller('shellSearchCtrl',function($scope){
+                    $scope.submit = function() {
+                        $scope.clickShellSearch(false);
+                        if ($scope.shellSearchText) {
+                            console.log($scope.shellSearchText);
+                        }
+                    };
                 });
     </script>
 </head>
@@ -51,48 +67,76 @@
         <ul class="top-nav top-navbar-nav">
             <li class="sidebar-toggle" ng-click="openMenu($event)">
                 <a class="menu-leaf" href="#">
-                    <i class="fa fa-bars fa-lg"></i>
-                </a>
-            </li>
-            <li class="hiddenPc" ng-click="openMenu($event)">
-                <a class="menu-leaf" href="#">
-                    <i class="fa fa-bars fa-lg"></i>
+                    <i class="fa fa-bars"></i>
                 </a>
             </li>
             <li>
                 <a href="#">
-                    <i class="fa fa-list fa-lg"></i>
+                    <i class="fa fa-list"></i>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fa fa-lock"></i>
                 </a>
             </li>
         </ul>
         <ul class="top-nav top-navbar-nav pull-right">
-            <li>
+            <li ng-click="clickShellSearch(true)">
                 <a href="#">
-                    <i class="fa fa-bell fa-lg"></i>
+                    <i class="fa fa-search"></i>
                 </a>
             </li>
             <li>
                 <a href="#">
-                    <i class="fa fa-joomla fa-lg"></i>
+                    <i class="fa fa-life-ring"></i>
                 </a>
             </li>
             <li>
                 <a href="#">
-                    <span class="glyphicon glyphicon-user"></span>
+                    <i class="fa fa-columns"></i>
                 </a>
             </li>
         </ul>
     </div>
+    <form role="form" class="navbar-form" ng-controller="shellSearchCtrl"
+          ng-class="{'open':openShellSearch}" ng-submit="submit()">
+        <div class="form-group" >
+            <input type="text" class="form-control" id="shellSearchText" ng-model="shellSearchText" placeholder="输入客户名称或电路编码">
+            <div class="fa fa-times form-control-feedback" ng-click="clickShellSearch(false)"></div>
+        </div>
+    </form>
 </nav>
 <aside ng-controller="navMenuCrtl">
     <nav class="main-menu-wrapper" ng-class="{'open':isOpen}">
         <ui-nav-menu class="main-menu-nav" source="menus"></ui-nav-menu>
     </nav>
 </aside>
+<aside class="offsidebar open">
+    <div>
+        <label><h6>实时故障</h6></label>
+        <div class="pull-right">
+            <label class="switch">
+                <input type="checkbox" ng-model="faultSocket">
+                <span></span>
+            </label>
+        </div>
+    </div>
+    <div>
+        <label><h6>实时告警</h6></label>
+        <div class="pull-right">
+            <label class="switch">
+                <input type="checkbox" ng-model="alarmSocket">
+                <span></span>
+            </label>
+        </div>
+    </div>
+</aside>
 <div class="main-panel">
     <div class="main-panel-content">
-        selected: {{ selectMenu.name }}</div>
+        selected: {{ selectMenu.name }}
     </div>
+</div>
 </div>
 </body>
 
