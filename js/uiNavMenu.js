@@ -20,7 +20,7 @@ angular.module('uiNavMenu', [])
                 menu: '=menu'
             },
             template: '<li ng-click="openSubMenu($event,menu)">'
-                        +'<a href="#" ng-class="{\'main-menu-parent\' : menu.children}">'
+                        +'<a href="" ng-class="{\'main-menu-parent\' : menu.children}">'
                           +'<i ng-show="menu.icon" class="{{menu.icon}}"></i>'
                           +'<span class="menu-text">{{menu.name}}</span>'
                           +'<b ng-show="menu.children" class="arrow fa fa-angle-down"></b>'
