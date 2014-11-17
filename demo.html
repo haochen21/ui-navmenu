@@ -8,14 +8,31 @@
     <link href="css/bootstrap-theme.css" rel="stylesheet"/>
     <link href="css/font-awesome.css" rel="stylesheet"/>
     <link href="css/uinavmenu.css" rel="stylesheet"/>
+    <link href="css/uicheckbox.css" rel="stylesheet"/>
     <script src="lib/angular.min.js"></script>
     <script src="js/uiNavMenu.js"></script>
+    <script src="js/uiCheckbox.js"></script>
     <script>
-        angular.module('demoApp', ['uiNavMenu'])
-                .controller('demoCtrl', function ($scope, $http, uiNavMenuEvent) {
+        angular.module('demoApp', ['uiNavMenu', 'uiCheckbox'])
+                .controller('demoCtrl', function ($scope, $http, $document, uiNavMenuEvent) {
 
                     //navbar查询按钮显示配置
                     $scope.openShellSearch = false;
+
+                    $scope.faults = [
+                        {
+                            "id": 465223, "circuitId": 120523, "beginTime": "2013-12-25 15:02:01", "customerGroupName": "倍乐生商贸(中国)有限公司", "circuitNo": "01T021967", "state": "已确认", "circuitState": "占用", "circuitServiceType": "DPLC", "circuitRate": "2M", "circuitGroupNo": "上海无锡NE0006NP"
+                        },
+                        {
+                            "id": 447976, "circuitId": 119972, "beginTime": "2013-12-21 19:33:07", "customerGroupName": "倍乐生商贸(中国)有限公司", "circuitNo": "01T025473", "state": "已确认", "circuitState": "占用", "circuitServiceType": "DPLC", "circuitRate": "4M", "circuitGroupNo": "上海无锡ANE0012NP"
+                        },
+                        {
+                            "id": 440434, "circuitId": 112549, "beginTime": "2013-12-06 15:36:40", "customerGroupName": "光大证券", "circuitNo": "01T022335", "state": "未确认", "circuitState": "占用", "circuitServiceType": "DPLC", "circuitRate": "2M", "circuitGroupNo": "上海遵义30N0001NP"
+                        },
+                        {
+                            "id": 433738, "circuitId": 123026, "beginTime": "2013-05-18 08:57:20", "customerGroupName": "兴业银行", "circuitNo": "01T017417", "state": "未确认", "circuitState": "占用", "circuitServiceType": "DPLC", "circuitRate": "100M", "circuitGroupNo": "上海福州ANE0002NP"
+                        }
+                    ];
 
                     $scope.loadData = function () {
                         $http.get('menu.json').success(function (data) {
@@ -33,9 +50,32 @@
                         $event.stopPropagation();
                     }
 
-                    $scope.clickShellSearch = function(value){
+                    $scope.clickShellSearch = function (value) {
                         $scope.openShellSearch = value;
                     }
+
+                    $scope.clickDropdownMenu = function ($event) {
+                        var $target = angular.element($event.currentTarget);
+                        $target.toggleClass('open');
+                    }
+
+                    $scope.clickOffSidebar = function () {
+                        var $body = $document.find('body').eq(0);
+                        var children = $body.children();
+                        for (var i = 0; i < children.length; i++) {
+                            if (children.eq(i).hasClass('offsidebar')) {
+                                children.eq(i).toggleClass('open');
+                                break;
+                            }
+                        }
+                    }
+
+                    $scope.alarmReceive = false;
+                    $scope.faultReceive = true;
+
+                    $scope.$watch("alarmReceive", function (newVal) {
+                        console.log(newVal);
+                    });
 
                     $scope.loadData();
                 })
@@ -45,8 +85,8 @@
                         $scope.isOpen = !$scope.isOpen;
                     })
                 })
-                .controller('shellSearchCtrl',function($scope){
-                    $scope.submit = function() {
+                .controller('shellSearchCtrl', function ($scope) {
+                    $scope.submit = function () {
                         $scope.clickShellSearch(false);
                         if ($scope.shellSearchText) {
                             console.log($scope.shellSearchText);
@@ -87,12 +127,25 @@
                     <i class="fa fa-search"></i>
                 </a>
             </li>
-            <li>
+            <li ng-click="clickDropdownMenu($event)">
                 <a href="#">
                     <i class="fa fa-life-ring"></i>
                 </a>
+
+                <div class="dropdown-menu widget-notifications fadeInUp">
+                    <div class="notifications-list">
+                        <div class="notification" ng-repeat="fault in faults">
+                            <div class="notification-title text-danger">{{fault.circuitNo}}</div>
+                            <div class="notification-description">{{fault.customerGroupName}}</div>
+                            <div class="notification-ago">{{fault.beginTime}}</div>
+                            <div class="notification-icon  fa fa-lightbulb-o bg-info"
+                                 ng-class="{'bg-danger':fault.state === '已确认','bg-info':fault.state === '未确认'}"></div>
+                        </div>
+                    </div>
+                    <a href="#" class="notifications-link">更多故障信息</a>
+                </div>
             </li>
-            <li>
+            <li ng-click="clickOffSidebar()">
                 <a href="#">
                     <i class="fa fa-columns"></i>
                 </a>
@@ -101,8 +154,10 @@
     </div>
     <form role="form" class="navbar-form" ng-controller="shellSearchCtrl"
           ng-class="{'open':openShellSearch}" ng-submit="submit()">
-        <div class="form-group" >
-            <input type="text" class="form-control" id="shellSearchText" ng-model="shellSearchText" placeholder="输入客户名称或电路编码">
+        <div class="form-group">
+            <input type="text" class="form-control" id="shellSearchText" ng-model="shellSearchText"
+                   placeholder="输入客户名称或电路编码">
+
             <div class="fa fa-times form-control-feedback" ng-click="clickShellSearch(false)"></div>
         </div>
     </form>
@@ -112,30 +167,25 @@
         <ui-nav-menu class="main-menu-nav" source="menus"></ui-nav-menu>
     </nav>
 </aside>
-<aside class="offsidebar open">
-    <div>
-        <label><h6>实时故障</h6></label>
-        <div class="pull-right">
-            <label class="switch">
-                <input type="checkbox" ng-model="faultSocket">
-                <span></span>
-            </label>
-        </div>
+<aside class="offsidebar">
+    <div class="user-name">
+        <img class="login-main-profile-img" src="img/photo.png">
+
+        <p class="user-name">陈昊</p>
     </div>
-    <div>
-        <label><h6>实时告警</h6></label>
-        <div class="pull-right">
-            <label class="switch">
-                <input type="checkbox" ng-model="alarmSocket">
-                <span></span>
-            </label>
-        </div>
-    </div>
+    <div class="divider"></div>
+    <div class="section-name">系统设置</div>
+    <div ui-checkbox check-name="故障接收" check-model="alarmReceive"></div>
+    <div ui-checkbox check-name="告警接收" check-model="faultReceive"></div>
+    <div class="divider"></div>
+    <div><a href="#" class="logout-link"><i class="fa fa-sign-out"></i><span class="text">退出登录</span>
+    </a></div>
 </aside>
 <div class="main-panel">
     <div class="main-panel-content">
         selected: {{ selectMenu.name }}
     </div>
+    <div ng-view></div>
 </div>
 </div>
 </body>
